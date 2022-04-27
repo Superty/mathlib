@@ -227,6 +227,56 @@ end
 theorem squarefree_iff_prime_squarefree {n : ℕ} : squarefree n ↔ ∀ x, prime x → ¬ x * x ∣ n :=
 squarefree_iff_irreducible_sq_not_dvd_of_exists_irreducible ⟨_, prime_two⟩
 
+lemma squarefree_iff_factorization_le_one {n : ℕ} (hn : n ≠ 0) :
+  squarefree n ↔ ∀ p, n.factorization p ≤ 1 :=
+begin
+  rw [multiplicity.squarefree_iff_multiplicity_le_one],
+  refine ⟨λ h p, _, λ h p, _⟩,
+  { by_cases hp : p.prime,
+    { have := h p,
+      simp only [hp.ne_one, nat.is_unit_iff, or_false, multiplicity_eq_factorization hp hn] at this,
+      exact_mod_cast this },
+    { rw factorization_eq_zero_of_non_prime _ hp,
+      exact zero_le_one } },
+
+end
+
+lemma squarefree.ext_iff {n m : ℕ} (hn : squarefree n) (hm : squarefree m) :
+  n = m ↔ ∀ p, prime p → (p ∣ n ↔ p ∣ m) :=
+begin
+  split,
+  { rintro rfl, simp },
+  intro h,
+
+
+  -- have hn₀ := hn.ne_zero,
+  -- have hn₀ := hn.ne_zero,
+  -- transitivity n.factors.to_finset = m.factors.to_finset,
+  -- { sorry
+  --   -- rw [((squarefree_iff_nodup_factors hn.ne_zero).1 hn).dedup,
+  --   --   ((squarefree_iff_nodup_factors hm.ne_zero).1 hm).dedup],
+  --   --   rw nat.factors_eq_iff
+
+  -- },
+
+
+end
+
+lemma squarefree_and_prime_pow_iff_prime {n : ℕ} :
+  squarefree n ∧ is_prime_pow n ↔ prime n :=
+begin
+  refine iff.symm ⟨λ hn, ⟨hn.squarefree, hn.is_prime_pow⟩, _⟩,
+  rw [squarefree_iff_prime_squarefree, is_prime_pow_iff_unique_prime_dvd],
+  rintro ⟨hp₃, p, ⟨hp₁, hp₂⟩, hp₄⟩,
+
+  -- rw squarefree_iff_prime_squarefree at hn₁,
+  -- rw is_prime_pow_iff_unique_prime_dvd at hn₂,
+  -- rw [is_prime_pow_iff_card_support_factorization_eq_one, support_factorization,
+  --   list.card_to_finset] at hn₂,
+end
+
+#exit
+
 /-- Assuming that `n` has no factors less than `k`, returns the smallest prime `p` such that
   `p^2 ∣ n`. -/
 def min_sq_fac_aux : ℕ → ℕ → option ℕ
@@ -458,11 +508,6 @@ begin
   { obtain ⟨a, b, -, -, h₁, h₂⟩ := sq_mul_squarefree_of_pos (succ_pos n),
     exact ⟨a, b, h₁, h₂⟩ },
 end
-
-lemma squarefree_iff_prime_sq_not_dvd (n : ℕ) :
-  squarefree n ↔ ∀ x : ℕ, x.prime → ¬ x * x ∣ n :=
-squarefree_iff_irreducible_sq_not_dvd_of_exists_irreducible
-  ⟨2, (irreducible_iff_nat_prime _).2 prime_two⟩
 
 /-- `squarefree` is multiplicative. Note that the → direction does not require `hmn`
 and generalizes to arbitrary commutative monoids. See `squarefree.of_mul_left` and

@@ -716,6 +716,12 @@ begin
   simp [h0, card_factors_mul, h],
 end
 
+@[simp] lemma card_factors_apply_prime {p : ℕ} (hp : p.prime) : Ω p = 1 :=
+card_factors_eq_one_iff_prime.2 hp
+
+@[simp] lemma card_factors_apply_prime_pow {p k : ℕ} (hp : p.prime) : Ω (p ^ k) = k :=
+by rw [card_factors_apply, hp.factors_pow, list.length_repeat]
+
 /-- `ω n` is the number of distinct prime factors of `n`. -/
 def card_distinct_factors : arithmetic_function ℕ :=
 ⟨λ n, n.factors.dedup.length, by simp⟩
@@ -723,6 +729,8 @@ def card_distinct_factors : arithmetic_function ℕ :=
 localized "notation `ω` := nat.arithmetic_function.card_distinct_factors" in arithmetic_function
 
 lemma card_distinct_factors_zero : ω 0 = 0 := by simp
+
+@[simp] lemma card_distinct_factors_one : ω 1 = 0 := by simp [card_distinct_factors]
 
 lemma card_distinct_factors_apply {n : ℕ} :
   ω n = n.factors.dedup.length := rfl
@@ -737,6 +745,20 @@ begin
   { rw h.dedup,
     refl }
 end
+
+lemma list.repeat_dedup {α : Type*} [decidable_eq α] {x : α} :
+  ∀ {k}, k ≠ 0 → (list.repeat x k).dedup = [x]
+| 0 h := (h rfl).elim
+| 1 _ := rfl
+| (n+2) _ := by rw [list.repeat_succ, list.dedup_cons_of_mem
+  (list.mem_repeat.2 ⟨n.succ_ne_zero, rfl⟩), list.repeat_dedup n.succ_ne_zero]
+
+@[simp] lemma card_distinct_factors_apply_prime_pow {p k : ℕ} (hp : p.prime) (hk : k ≠ 0) :
+  ω (p ^ k) = 1 :=
+by rw [card_distinct_factors_apply, hp.factors_pow, list.repeat_dedup hk, list.length_singleton]
+
+@[simp] lemma card_distinct_factors_apply_prime {p : ℕ} (hp : p.prime) : ω p = 1 :=
+by rw [←pow_one p, card_distinct_factors_apply_prime_pow hp one_ne_zero]
 
 /-- `μ` is the Möbius function. If `n` is squarefree with an even number of distinct prime factors,
   `μ n = 1`. If `n` is squarefree with an odd number of distinct prime factors, `μ n = -1`.
@@ -768,6 +790,18 @@ begin
     rw moebius_apply_of_squarefree h,
     apply neg_one_pow_eq_or },
   { rcases h with h | h; simp [h] }
+end
+
+lemma moebius_apply_prime {p : ℕ} (hp : p.prime) : μ p = 1 :=
+begin
+  rw moebius_apply_of_squarefree,
+
+end
+
+lemma moebius_prime_pow {p : ℕ} {k : ℕ} (hp : p.prime) (hk : k ≠ 0) :
+  μ (p ^ k) = if k = 1 then 1 else 0 :=
+begin
+
 end
 
 lemma is_multiplicative_moebius : is_multiplicative μ :=

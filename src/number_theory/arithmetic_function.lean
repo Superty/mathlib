@@ -792,11 +792,8 @@ begin
   { rcases h with h | h; simp [h] }
 end
 
-lemma moebius_apply_prime {p : ℕ} (hp : p.prime) : μ p = 1 :=
-begin
-  rw moebius_apply_of_squarefree,
-
-end
+lemma moebius_apply_prime {p : ℕ} (hp : p.prime) : μ p = -1 :=
+by rw [moebius_apply_of_squarefree hp.squarefree, card_factors_apply_prime hp, pow_one]
 
 lemma moebius_prime_pow {p : ℕ} {k : ℕ} (hp : p.prime) (hk : k ≠ 0) :
   μ (p ^ k) = if k = 1 then 1 else 0 :=

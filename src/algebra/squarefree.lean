@@ -278,9 +278,7 @@ begin
   rw [factorization_eq_zero_of_non_prime _ hp, factorization_eq_zero_of_non_prime _ hp],
 end
 
-#check nat.two_le_iff
-
-lemma squarefree_pow_iff {n k : ℕ} (hk : k ≠ 0) :
+lemma squarefree_pow_iff {n k : ℕ} (hn : n ≠ 1) (hk : k ≠ 0) :
   squarefree (n ^ k) ↔ squarefree n ∧ k = 1 :=
 begin
   symmetry,
@@ -288,20 +286,19 @@ begin
   { rintro ⟨hn, rfl⟩,
     simpa },
   intro h,
-  rcases eq_or_ne n 0 with rfl | hn,
+  rcases eq_or_ne n 0 with rfl | hn₀,
   { rw zero_pow hk.bot_lt at h,
     simpa using h },
   split,
   { exact squarefree_of_dvd_of_squarefree (dvd_pow_self _ hk) h },
-  by_contra,
+  by_contra h₁,
   have : 2 ≤ k,
-  { rw nat.two_le_iff,
-
-
-  },
+  { rw [nat.two_le_iff],
+    exact ⟨hk, h₁⟩ },
+  apply hn (nat.is_unit_iff.1 (h _ _)),
+  rw ←sq,
+  exact pow_dvd_pow _ this
 end
-
-#exit
 
 lemma squarefree_and_prime_pow_iff_prime {n : ℕ} :
   squarefree n ∧ is_prime_pow n ↔ prime n :=
@@ -309,12 +306,8 @@ begin
   refine iff.symm ⟨λ hn, ⟨hn.squarefree, hn.is_prime_pow⟩, _⟩,
   rw is_prime_pow_nat_iff,
   rintro ⟨h, p, k, hp, hk, rfl⟩,
-  rw ←nat.succ_le_iff at hk,
-  rcases hk.eq_or_lt with rfl | hk',
-  { simpa },
-  apply (mt (h p) hp.not_unit _).elim,
-  rw [←sq],
-  exact pow_dvd_pow _ hk',
+  rw squarefree_pow_iff hp.ne_one hk.ne' at h,
+  rwa [h.2, pow_one],
 end
 
 /-- Assuming that `n` has no factors less than `k`, returns the smallest prime `p` such that
